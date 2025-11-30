@@ -28,7 +28,7 @@ public class Wallet {
     private BigDecimal balance = BigDecimal.ZERO;
 
     @Column(nullable = false)
-    private String currency = "USD";
+    private String currency = "NGN";
 
     private boolean active = true;
 
