@@ -1,6 +1,6 @@
 package com.paylense.dto;
 
-import com.paylense.domain.Transaction;
+import com.paylense.domain.entity.Transaction;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
@@ -14,6 +14,7 @@ public class TransactionResponse {
     private String sourceWalletId;
     private String destinationWalletId;
     private String reference;
+    private String description;
 
     public TransactionResponse(Transaction transaction) {
         this.id = transaction.getId();
@@ -21,10 +22,11 @@ public class TransactionResponse {
         this.currency = transaction.getCurrency();
         this.type = transaction.getType().name();
         this.status = transaction.getStatus().name();
-        this.timestamp = transaction.getTimestamp();
-        this.sourceWalletId = transaction.getSourceWalletId();
-        this.destinationWalletId = transaction.getDestinationWalletId();
+        this.timestamp = transaction.getCreatedAt();
+        this.sourceWalletId = transaction.getSenderWallet().getWalletNumber();
+        this.destinationWalletId = transaction.getReceiverWallet().getWalletNumber();
         this.reference = transaction.getReference();
+        this.description = transaction.getDescription();
     }
 
     // Getters
@@ -37,4 +39,5 @@ public class TransactionResponse {
     public String getSourceWalletId() { return sourceWalletId; }
     public String getDestinationWalletId() { return destinationWalletId; }
     public String getReference() { return reference; }
+    public String getDescription() { return description; }
 }
