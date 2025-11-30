@@ -1,57 +1,53 @@
 package com.paylense.web.controller;
 
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
+import com.paylense.application.dto.AccountManagementDto;
+import com.paylense.application.service.AccountService;
+import com.paylense.domain.entity.User;
 import org.springframework.http.ResponseEntity;
-import org.springframework.http.HttpStatus;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/account")
 public class AccountController {
 
-    // Endpoint to get user profile by userId
-    @GetMapping("/profile/{userId}")
-    public ResponseEntity<String> getUserProfile(@PathVariable String userId) {
-        // Placeholder logic for fetching user profile
-        String userProfile = "User profile data for user: " + userId;
-        return new ResponseEntity<>(userProfile, HttpStatus.OK);
+    private final AccountService accountService;
+
+    public AccountController(AccountService accountService) {
+        this.accountService = accountService;
+    }
+
+    // Endpoint to get user profile
+    @GetMapping("/profile")
+    public ResponseEntity<AccountManagementDto.UserProfileDto> getUserProfile(@AuthenticationPrincipal User user) {
+        return accountService.getUserProfile(user.getId())
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
     }
 
     // Endpoint to update user profile
-    @PutMapping("/profile/{userId}")
-    public ResponseEntity<String> updateUserProfile(@PathVariable String userId, @RequestBody String profileData) {
-        // Placeholder logic for updating user profile
-        String response = "Updated profile for user: " + userId + " with data: " + profileData;
-        return new ResponseEntity<>(response, HttpStatus.OK);
+    @PutMapping("/profile")
+    public ResponseEntity<AccountManagementDto.UserProfileDto> updateUserProfile(@AuthenticationPrincipal User user, @RequestBody AccountManagementDto.UserProfileDto profileData) {
+        return ResponseEntity.ok(accountService.updateUserProfile(user.getId(), profileData));
     }
 
     // Endpoint to get account settings
-    @GetMapping("/settings/{userId}")
-    public ResponseEntity<String> getAccountSettings(@PathVariable String userId) {
-        // Placeholder logic for fetching account settings
-        String settings = "Account settings for user: " + userId;
-        return new ResponseEntity<>(settings, HttpStatus.OK);
+    @GetMapping("/settings")
+    public ResponseEntity<AccountManagementDto.AccountSettingsDto> getAccountSettings(@AuthenticationPrincipal User user) {
+        return accountService.getAccountSettings(user.getId())
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
     }
 
     // Endpoint to update account settings
-    @PutMapping("/settings/{userId}")
-    public ResponseEntity<String> updateAccountSettings(@PathVariable String userId, @RequestBody String settingsData) {
-        // Placeholder logic for updating account settings
-        String response = "Updated account settings for user: " + userId + " with data: " + settingsData;
-        return new ResponseEntity<>(response, HttpStatus.OK);
+    @PutMapping("/settings")
+    public ResponseEntity<AccountManagementDto.AccountSettingsDto> updateAccountSettings(@AuthenticationPrincipal User user, @RequestBody AccountManagementDto.AccountSettingsDto settingsData) {
+        return ResponseEntity.ok(accountService.updateAccountSettings(user.getId(), settingsData));
     }
 
     // Endpoint to get balance inquiry
-    @GetMapping("/balance/{userId}")
-    public ResponseEntity<String> getBalance(@PathVariable String userId) {
-        // Placeholder logic for fetching balance
-        String balance = "Balance for user: " + userId + " is $1000";
-        return new ResponseEntity<>(balance, HttpStatus.OK);
+    @GetMapping("/balance")
+    public ResponseEntity<AccountManagementDto.BalanceResponseDto> getBalance(@AuthenticationPrincipal User user) {
+        return ResponseEntity.ok(accountService.getAccountBalance(user.getId()));
     }
-
 }
