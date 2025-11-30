@@ -6,7 +6,6 @@ import com.paylense.infrastructure.repository.WalletRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import java.math.BigDecimal;
-import java.util.UUID;
 
 @Service
 public class WalletService {
@@ -25,16 +24,12 @@ public class WalletService {
 
         Wallet wallet = new Wallet();
         wallet.setUser(user);
-        wallet.setWalletNumber(generateWalletNumber());
+        // Use phone number as wallet number
+        wallet.setWalletNumber(user.getPhoneNumber());
         wallet.setBalance(BigDecimal.ZERO);
-        wallet.setCurrency("USD"); // Default currency
+        wallet.setCurrency("NGN"); // Default currency
         
         return walletRepository.save(wallet);
-    }
-
-    private String generateWalletNumber() {
-        // Simple generation strategy for now
-        return UUID.randomUUID().toString().replace("-", "").substring(0, 12).toUpperCase();
     }
     
     public Wallet getWalletByUser(Long userId) {
