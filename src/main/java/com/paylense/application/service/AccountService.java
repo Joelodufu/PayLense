@@ -1,20 +1,19 @@
 package com.paylense.application.service;
 
-import com.paylense.application.model.UserProfile;
-import com.paylense.application.model.AccountSettings;
-import java.math.BigDecimal;
+import com.paylense.application.dto.AccountManagementDto;
+import java.util.Optional;
 
 public interface AccountService {
 
     // User profile management
-    UserProfile getUserProfile(String userId);
-    void updateUserProfile(String userId, UserProfile userProfile);
+    Optional<AccountManagementDto.UserProfileDto> getUserProfile(Long userId);
+    AccountManagementDto.UserProfileDto updateUserProfile(Long userId, AccountManagementDto.UserProfileDto userProfile);
 
     // Account settings management
-    AccountSettings getAccountSettings(String userId);
-    void updateAccountSettings(String userId, AccountSettings accountSettings);
+    Optional<AccountManagementDto.AccountSettingsDto> getAccountSettings(Long userId);
+    AccountManagementDto.AccountSettingsDto updateAccountSettings(Long userId, AccountManagementDto.AccountSettingsDto accountSettings);
 
     // Balance inquiries
-    BigDecimal getAccountBalance(String userId);
+    AccountManagementDto.BalanceResponseDto getAccountBalance(Long userId);
 
 }
