@@ -12,10 +12,12 @@ public class AuthService {
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
+    private final WalletService walletService;
 
-    public AuthService(UserRepository userRepository, PasswordEncoder passwordEncoder) {
+    public AuthService(UserRepository userRepository, PasswordEncoder passwordEncoder, WalletService walletService) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
+        this.walletService = walletService;
     }
 
     @Transactional
@@ -30,6 +32,11 @@ public class AuthService {
         user.setFirstName(request.getFirstName());
         user.setLastName(request.getLastName());
         
-        return userRepository.save(user);
+        User savedUser = userRepository.save(user);
+        
+        // Create wallet for the new user
+        walletService.createWallet(savedUser);
+        
+        return savedUser;
     }
 }
