@@ -1,9 +1,9 @@
 package com.paylense.service;
 
-import com.paylense.domain.Transaction;
-import com.paylense.domain.Transaction.TransactionStatus;
-import com.paylense.domain.Transaction.TransactionType;
-import com.paylense.domain.Wallet;
+import com.paylense.domain.entity.Transaction;
+import com.paylense.domain.entity.TransactionStatus;
+import com.paylense.domain.entity.TransactionType;
+import com.paylense.domain.entity.Wallet;
 import com.paylense.dto.TransferRequest;
 import com.paylense.dto.TransactionResponse;
 import com.paylense.repository.TransactionRepository;
@@ -53,15 +53,17 @@ public class TransactionService {
         walletRepository.save(recipientWallet);
 
         // 5. Record Transaction
-        Transaction transaction = new Transaction(
-                request.getAmount(),
-                senderWallet.getCurrency(),
-                TransactionType.TRANSFER,
-                TransactionStatus.SUCCESS,
-                senderWallet.getWalletNumber(),
-                recipientWallet.getWalletNumber(),
-                UUID.randomUUID().toString()
-        );
+        Transaction transaction = new Transaction();
+        transaction.setAmount(request.getAmount());
+        transaction.setCurrency(senderWallet.getCurrency());
+        transaction.setType(TransactionType.TRANSFER);
+        transaction.setStatus(TransactionStatus.SUCCESS);
+        transaction.setSenderWallet(senderWallet);
+        transaction.setReceiverWallet(recipientWallet);
+        transaction.setReference(UUID.randomUUID().toString());
+        transaction.setDescription(request.getDescription() != null ? request.getDescription() : "Transfer");
+        
+        // createdAt is handled by @PrePersist in the entity
 
         Transaction savedTransaction = transactionRepository.save(transaction);
         return new TransactionResponse(savedTransaction);
@@ -71,7 +73,7 @@ public class TransactionService {
         Wallet userWallet = walletRepository.findByUserEmail(userEmail)
                 .orElseThrow(() -> new RuntimeException("Wallet not found"));
         
-        return transactionRepository.findBySourceWalletIdOrDestinationWalletIdOrderByTimestampDesc(
+        return transactionRepository.findBySenderWalletWalletNumberOrReceiverWalletWalletNumberOrderByCreatedAtDesc(
                 userWallet.getWalletNumber(), userWallet.getWalletNumber())
                 .stream()
                 .map(TransactionResponse::new)
