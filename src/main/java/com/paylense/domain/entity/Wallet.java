@@ -31,6 +31,9 @@ public class Wallet {
     private String currency = "NGN";
 
     private boolean active = true;
+    
+    @Version
+    private Long version;
 
     @Column(name = "created_at")
     private LocalDateTime createdAt;
