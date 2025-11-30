@@ -28,6 +28,9 @@ public class User {
     @Column(nullable = false)
     private String lastName;
 
+    @Column(nullable = false, unique = true)
+    private String phoneNumber;
+
     private boolean active = true;
 
     @Column(name = "created_at")
