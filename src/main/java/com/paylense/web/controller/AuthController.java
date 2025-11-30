@@ -1,8 +1,9 @@
 package com.paylense.web.controller;
 
+import com.paylense.application.dto.AuthenticationResponse;
+import com.paylense.application.dto.LoginRequest;
 import com.paylense.application.dto.RegisterRequest;
 import com.paylense.application.service.AuthService;
-import com.paylense.domain.entity.User;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -17,13 +18,13 @@ public class AuthController {
     }
 
     @PostMapping("/register")
-    public ResponseEntity<?> register(@RequestBody RegisterRequest request) {
-        try {
-            User user = authService.register(request);
-            return ResponseEntity.ok("User registered successfully with ID: " + user.getId());
-        } catch (RuntimeException e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
-        }
+    public ResponseEntity<AuthenticationResponse> register(@RequestBody RegisterRequest request) {
+        return ResponseEntity.ok(authService.register(request));
+    }
+    
+    @PostMapping("/login")
+    public ResponseEntity<AuthenticationResponse> login(@RequestBody LoginRequest request) {
+        return ResponseEntity.ok(authService.login(request));
     }
     
     @GetMapping("/test")
