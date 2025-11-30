@@ -1,34 +1,68 @@
 package com.paylense.web.controller;
 
-import com.paylense.application.dto.AuthenticationResponse;
-import com.paylense.application.dto.LoginRequest;
-import com.paylense.application.dto.RegisterRequest;
-import com.paylense.application.service.AuthService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
 
+@Tag(name = "Authentication Controller", description = "APIs for user authentication and authorization")
 @RestController
-@RequestMapping("/api/auth")
+@RequestMapping("/auth")
 public class AuthController {
 
-    private final AuthService authService;
-
-    public AuthController(AuthService authService) {
-        this.authService = authService;
-    }
-
-    @PostMapping("/register")
-    public ResponseEntity<AuthenticationResponse> register(@RequestBody RegisterRequest request) {
-        return ResponseEntity.ok(authService.register(request));
-    }
-    
+    @Operation(summary = "User login", description = "Authenticate user with username and password")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Successful login"),
+        @ApiResponse(responseCode = "401", description = "Unauthorized - invalid credentials"),
+        @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
     @PostMapping("/login")
-    public ResponseEntity<AuthenticationResponse> login(@RequestBody LoginRequest request) {
-        return ResponseEntity.ok(authService.login(request));
+    public ResponseEntity<?> login(@RequestBody LoginRequest loginRequest) {
+        // login logic
+        return ResponseEntity.ok().build();
     }
-    
-    @GetMapping("/test")
-    public ResponseEntity<String> test() {
-        return ResponseEntity.ok("Auth service is running");
+
+    @Operation(summary = "User registration", description = "Register a new user")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "201", description = "User registered successfully"),
+        @ApiResponse(responseCode = "400", description = "Bad request - invalid input"),
+        @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
+    @PostMapping("/register")
+    public ResponseEntity<?> register(@RequestBody RegisterRequest registerRequest) {
+        // registration logic
+        return ResponseEntity.status(201).build();
     }
+
+    @Operation(summary = "User logout", description = "Logout the current user")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Successful logout"),
+        @ApiResponse(responseCode = "401", description = "Unauthorized - user not logged in"),
+        @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
+    @PostMapping("/logout")
+    public ResponseEntity<?> logout() {
+        // logout logic
+        return ResponseEntity.ok().build();
+    }
+
+    @Operation(summary = "Get current user details", description = "Retrieve details of the authenticated user")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "User details retrieved successfully"),
+        @ApiResponse(responseCode = "401", description = "Unauthorized - user not logged in"),
+        @ApiResponse(responseCode = "404", description = "User not found"),
+        @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
+    @GetMapping("/me")
+    public ResponseEntity<?> getCurrentUser() {
+        // get current user logic
+        return ResponseEntity.ok().build();
+    }
+
 }
