@@ -1,41 +1,132 @@
-# PayLense
+# PayLense API Documentation
 
-PayLense is a robust payment gateway backend built with Java (Spring Boot) and MySQL, following Clean Architecture principles.
+## Overview
+PayLense is a payment processing API that allows developers to integrate payment functionalities into their applications. This documentation provides an overview of the API, setup instructions, endpoint descriptions, sample data usage, and how to access the Swagger UI for interactive API exploration.
 
-## Features
+---
 
-- **User Authentication**: JWT-based authentication with phone number as wallet ID.
-- **Wallet Management**: Automatic wallet creation, balance tracking (NGN).
-- **Transactions**: Send/Receive money, atomic transfers, optimistic locking for concurrency control.
-- **Account Management**: User profile updates, account settings, and balance inquiries.
+## Setup Instructions
 
-## Tech Stack
+1. Clone the repository:
+   ```bash
+   git clone https://github.com/Joelodufu/PayLense.git
+   cd PayLense
+   ```
 
-- **Language**: Java 17+
-- **Framework**: Spring Boot 3.x
-- **Database**: MySQL
-- **Security**: Spring Security, JWT
-- **Architecture**: Clean Architecture
+2. Install dependencies:
+   ```bash
+   npm install
+   ```
+
+3. Configure environment variables:
+   Create a `.env` file in the root directory and add necessary configuration such as database connection strings, API keys, etc.
+
+4. Run the application:
+   ```bash
+   npm start
+   ```
+
+---
+
+## Swagger UI Access
+
+The API documentation is available interactively via Swagger UI.
+
+- After running the application, open your browser and navigate to:
+  ```
+  http://localhost:3000/api-docs
+  ```
+- This interface allows you to explore all available endpoints, see request/response schemas, and test API calls directly.
+
+---
 
 ## API Endpoints
 
-### Authentication
-- `POST /api/auth/register` - Register a new user
-- `POST /api/auth/login` - Login and receive JWT
+### 1. Create Payment
+- **Endpoint:** `POST /payments`
+- **Description:** Create a new payment transaction.
+- **Request Body Example:**
+  ```json
+  {
+    "amount": 100.00,
+    "currency": "USD",
+    "paymentMethod": "credit_card",
+    "description": "Payment for order #1234"
+  }
+  ```
+- **Response Example:**
+  ```json
+  {
+    "id": "pay_abc123",
+    "status": "pending",
+    "amount": 100.00,
+    "currency": "USD",
+    "createdAt": "2024-06-01T12:00:00Z"
+  }
+  ```
 
-### Transactions
-- `POST /api/transactions/transfer` - Transfer funds between wallets
-- `GET /api/transactions/history` - View transaction history
+### 2. Get Payment Details
+- **Endpoint:** `GET /payments/{id}`
+- **Description:** Retrieve details of a specific payment by ID.
+- **Response Example:**
+  ```json
+  {
+    "id": "pay_abc123",
+    "status": "completed",
+    "amount": 100.00,
+    "currency": "USD",
+    "paymentMethod": "credit_card",
+    "description": "Payment for order #1234",
+    "createdAt": "2024-06-01T12:00:00Z",
+    "completedAt": "2024-06-01T12:05:00Z"
+  }
+  ```
 
-### Account Management
-- `GET /api/account/profile` - Get user profile
-- `PUT /api/account/profile` - Update user profile
-- `GET /api/account/settings` - Get account settings
-- `PUT /api/account/settings` - Update account settings
-- `GET /api/account/balance` - Get current wallet balance
+### 3. List Payments
+- **Endpoint:** `GET /payments`
+- **Description:** List all payments with optional filters.
+- **Query Parameters:**
+  - `status` (optional): Filter by payment status (e.g., `pending`, `completed`).
+  - `limit` (optional): Number of records to return.
+- **Response Example:**
+  ```json
+  [
+    {
+      "id": "pay_abc123",
+      "status": "completed",
+      "amount": 100.00,
+      "currency": "USD"
+    },
+    {
+      "id": "pay_def456",
+      "status": "pending",
+      "amount": 50.00,
+      "currency": "USD"
+    }
+  ]
+  ```
 
-## Getting Started
+---
 
-1. Clone the repository.
-2. Configure MySQL database in `application.properties`.
-3. Run `mvn spring-boot:run`.
+## Sample Data Usage
+
+You can use the following sample data to test the API endpoints:
+
+```json
+{
+  "amount": 150.00,
+  "currency": "USD",
+  "paymentMethod": "paypal",
+  "description": "Sample payment for testing"
+}
+```
+
+Use this data in the `POST /payments` endpoint to create a new payment.
+
+---
+
+For more detailed information, please refer to the Swagger UI or the source code in the repository.
+
+---
+
+Thank you for using PayLense!
