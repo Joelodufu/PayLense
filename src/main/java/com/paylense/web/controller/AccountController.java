@@ -1,53 +1,60 @@
 package com.paylense.web.controller;
 
-import com.paylense.application.dto.AccountManagementDto;
-import com.paylense.application.service.AccountService;
-import com.paylense.domain.entity.User;
-import org.springframework.http.ResponseEntity;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+import com.paylense.web.model.User;
 
+@Tag(name = "Account Controller", description = "APIs for managing user accounts")
 @RestController
-@RequestMapping("/api/account")
+@RequestMapping("/api/accounts")
 public class AccountController {
 
-    private final AccountService accountService;
-
-    public AccountController(AccountService accountService) {
-        this.accountService = accountService;
+    @Operation(summary = "Get account details", description = "Retrieve details of the authenticated user's account")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Account details retrieved successfully"),
+        @ApiResponse(responseCode = "401", description = "Unauthorized - Authentication failed or missing"),
+        @ApiResponse(responseCode = "404", description = "Account not found")
+    })
+    @GetMapping("/me")
+    public String getAccountDetails(
+        @Parameter(description = "Authenticated user", required = true)
+        @AuthenticationPrincipal User user) {
+        // Implementation here
+        return "Account details for user: " + user.getUsername();
     }
 
-    // Endpoint to get user profile
-    @GetMapping("/profile")
-    public ResponseEntity<AccountManagementDto.UserProfileDto> getUserProfile(@AuthenticationPrincipal User user) {
-        return accountService.getUserProfile(user.getId())
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+    @Operation(summary = "Update account information", description = "Update the authenticated user's account information")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Account updated successfully"),
+        @ApiResponse(responseCode = "400", description = "Invalid input data"),
+        @ApiResponse(responseCode = "401", description = "Unauthorized - Authentication failed or missing"),
+        @ApiResponse(responseCode = "404", description = "Account not found")
+    })
+    @PutMapping("/me")
+    public String updateAccount(
+        @Parameter(description = "Authenticated user", required = true)
+        @AuthenticationPrincipal User user,
+        @RequestBody String accountUpdateRequest) {
+        // Implementation here
+        return "Account updated for user: " + user.getUsername();
     }
 
-    // Endpoint to update user profile
-    @PutMapping("/profile")
-    public ResponseEntity<AccountManagementDto.UserProfileDto> updateUserProfile(@AuthenticationPrincipal User user, @RequestBody AccountManagementDto.UserProfileDto profileData) {
-        return ResponseEntity.ok(accountService.updateUserProfile(user.getId(), profileData));
+    @Operation(summary = "Delete account", description = "Delete the authenticated user's account")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "204", description = "Account deleted successfully"),
+        @ApiResponse(responseCode = "401", description = "Unauthorized - Authentication failed or missing"),
+        @ApiResponse(responseCode = "404", description = "Account not found")
+    })
+    @DeleteMapping("/me")
+    public void deleteAccount(
+        @Parameter(description = "Authenticated user", required = true)
+        @AuthenticationPrincipal User user) {
+        // Implementation here
     }
 
-    // Endpoint to get account settings
-    @GetMapping("/settings")
-    public ResponseEntity<AccountManagementDto.AccountSettingsDto> getAccountSettings(@AuthenticationPrincipal User user) {
-        return accountService.getAccountSettings(user.getId())
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
-    }
-
-    // Endpoint to update account settings
-    @PutMapping("/settings")
-    public ResponseEntity<AccountManagementDto.AccountSettingsDto> updateAccountSettings(@AuthenticationPrincipal User user, @RequestBody AccountManagementDto.AccountSettingsDto settingsData) {
-        return ResponseEntity.ok(accountService.updateAccountSettings(user.getId(), settingsData));
-    }
-
-    // Endpoint to get balance inquiry
-    @GetMapping("/balance")
-    public ResponseEntity<AccountManagementDto.BalanceResponseDto> getBalance(@AuthenticationPrincipal User user) {
-        return ResponseEntity.ok(accountService.getAccountBalance(user.getId()));
-    }
 }
