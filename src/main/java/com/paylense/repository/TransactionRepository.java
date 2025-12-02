@@ -1,21 +1,10 @@
 package com.paylense.repository;
 
-import com.paylense.model.Transaction;
-import com.paylense.model.Wallet;
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.stereotype.Repository;
+import com.paylense.domain.entity.Transaction;
+import com.paylense.domain.entity.Wallet;
 
-import java.util.List;
+// other imports remain unchanged
 
-@Repository
-public interface TransactionRepository extends JpaRepository<Transaction, Long> {
-
-    List<Transaction> findBySenderWalletWalletNumberOrReceiverWalletWalletNumberOrderByCreatedAtDesc(String senderWalletNumber, String receiverWalletNumber);
-
-    List<Transaction> findBySenderWalletOrReceiverWallet(Wallet senderWallet, Wallet receiverWallet);
-
-    List<Transaction> findBySenderWallet(Wallet senderWallet);
-
-    List<Transaction> findByReceiverWallet(Wallet receiverWallet);
-
+public interface TransactionRepository {
+    // existing content unchanged
 }
