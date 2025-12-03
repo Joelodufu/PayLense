@@ -4,92 +4,60 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
+/**
+ * Service to handle payment refunds for PayLense payment gateway.
+ * Supports partial refunds, full refunds, and refund status tracking.
+ */
 public class RefundService {
 
-    public enum RefundStatus {
-        PENDING,
-        COMPLETED,
-        FAILED
-    }
+    // In-memory store for refund statuses keyed by refund ID
+    private Map<String, String> refundStatusMap = new HashMap<>();
 
-    public static class RefundTransaction {
-        private String transactionId;
-        private String paymentId;
-        private double amount;
-        private RefundStatus status;
-
-        public RefundTransaction(String paymentId, double amount) {
-            this.transactionId = UUID.randomUUID().toString();
-            this.paymentId = paymentId;
-            this.amount = amount;
-            this.status = RefundStatus.PENDING;
-        }
-
-        public String getTransactionId() {
-            return transactionId;
-        }
-
-        public String getPaymentId() {
-            return paymentId;
-        }
-
-        public double getAmount() {
-            return amount;
-        }
-
-        public RefundStatus getStatus() {
-            return status;
-        }
-
-        public void setStatus(RefundStatus status) {
-            this.status = status;
-        }
-    }
-
-    private Map<String, RefundTransaction> refundTransactions = new HashMap<>();
-
-    // Process a refund for a given payment ID and amount
-    public RefundTransaction processRefund(String paymentId, double amount) {
-        if (!validateRefundEligibility(paymentId, amount)) {
-            throw new IllegalArgumentException("Refund not eligible for payment ID: " + paymentId);
-        }
-
-        RefundTransaction refundTransaction = new RefundTransaction(paymentId, amount);
-        refundTransactions.put(refundTransaction.getTransactionId(), refundTransaction);
-
+    /**
+     * Initiates a full refund for a given payment ID.
+     *
+     * @param paymentId The ID of the payment to refund.
+     * @return The refund ID generated for tracking.
+     */
+    public String refundFull(String paymentId) {
         // Simulate refund processing logic
-        boolean refundSuccess = executeRefund(paymentId, amount);
-
-        if (refundSuccess) {
-            refundTransaction.setStatus(RefundStatus.COMPLETED);
-        } else {
-            refundTransaction.setStatus(RefundStatus.FAILED);
-        }
-
-        return refundTransaction;
+        String refundId = generateRefundId();
+        refundStatusMap.put(refundId, "FULL_REFUND_INITIATED");
+        // Here you would integrate with PayLense API to process full refund
+        // For example: payLenseApi.refund(paymentId, fullAmount);
+        refundStatusMap.put(refundId, "FULL_REFUND_COMPLETED");
+        return refundId;
     }
 
-    // Validate if a refund is eligible for the given payment ID and amount
-    public boolean validateRefundEligibility(String paymentId, double amount) {
-        // Placeholder for actual validation logic
-        // For example, check if payment exists, if amount is within refundable limits, etc.
-        if (paymentId == null || paymentId.isEmpty() || amount <= 0) {
-            return false;
-        }
-        // Additional validation can be added here
-        return true;
+    /**
+     * Initiates a partial refund for a given payment ID and amount.
+     *
+     * @param paymentId The ID of the payment to refund.
+     * @param amount The amount to refund partially.
+     * @return The refund ID generated for tracking.
+     */
+    public String refundPartial(String paymentId, double amount) {
+        // Simulate refund processing logic
+        String refundId = generateRefundId();
+        refundStatusMap.put(refundId, "PARTIAL_REFUND_INITIATED");
+        // Here you would integrate with PayLense API to process partial refund
+        // For example: payLenseApi.refund(paymentId, amount);
+        refundStatusMap.put(refundId, "PARTIAL_REFUND_COMPLETED");
+        return refundId;
     }
 
-    // Simulate the execution of the refund with the payment gateway
-    private boolean executeRefund(String paymentId, double amount) {
-        // Placeholder for integration with payment gateway refund API
-        // For now, we simulate success
-        return true;
+    /**
+     * Gets the current status of a refund by refund ID.
+     *
+     * @param refundId The refund ID to check status for.
+     * @return The current status of the refund.
+     */
+    public String getRefundStatus(String refundId) {
+        return refundStatusMap.getOrDefault(refundId, "REFUND_ID_NOT_FOUND");
     }
 
-    // Get refund transaction by transaction ID
-    public RefundTransaction getRefundTransaction(String transactionId) {
-        return refundTransactions.get(transactionId);
+    // Utility method to generate a unique refund ID
+    private String generateRefundId() {
+        return UUID.randomUUID().toString();
     }
-
 }
