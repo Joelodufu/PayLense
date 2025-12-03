@@ -1,82 +1,53 @@
 package com.paylense.service;
 
 import java.math.BigDecimal;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.NavigableMap;
+import java.util.TreeMap;
 
 /**
- * Service to handle fee calculation and management for payment gateway operations.
+ * Service to calculate transaction fees based on different fee structures
+ * (fixed, percentage, or tiered) for the PayLense payment gateway.
  */
 public class TransactionFeeService {
 
-    // Example fee rate for transfer (e.g., 2.5%)
-    private static final BigDecimal TRANSFER_FEE_RATE = new BigDecimal("0.025");
-
-    // Simulated fee accounts storage (accountId -> balance)
-    private Map<String, BigDecimal> feeAccounts = new HashMap<>();
+    public enum FeeType {
+        FIXED,
+        PERCENTAGE,
+        TIERED
+    }
 
     /**
-     * Calculate the transfer fee based on the amount.
+     * Calculate transaction fee based on fee type and parameters.
      *
-     * @param amount The amount to transfer
+     * @param amount The transaction amount
+     * @param feeType The type of fee structure
+     * @param feeValue The fee value (fixed amount or percentage as decimal, e.g. 0.02 for 2%)
+     * @param tieredFees The tiered fee map where key is the upper bound of the tier and value is the fee for that tier
+     *                   (only used if feeType is TIERED)
      * @return The calculated fee
      */
-    public BigDecimal calculateTransferFee(BigDecimal amount) {
-        if (amount == null || amount.compareTo(BigDecimal.ZERO) <= 0) {
-            throw new IllegalArgumentException("Amount must be positive");
+    public BigDecimal calculateFee(BigDecimal amount, FeeType feeType, BigDecimal feeValue, NavigableMap<BigDecimal, BigDecimal> tieredFees) {
+        switch (feeType) {
+            case FIXED:
+                return feeValue;
+            case PERCENTAGE:
+                return amount.multiply(feeValue);
+            case TIERED:
+                if (tieredFees == null || tieredFees.isEmpty()) {
+                    throw new IllegalArgumentException("Tiered fees map must be provided for TIERED fee type");
+                }
+                // Find the tier for the amount
+                BigDecimal fee = BigDecimal.ZERO;
+                for (var entry : tieredFees.entrySet()) {
+                    if (amount.compareTo(entry.getKey()) <= 0) {
+                        fee = entry.getValue();
+                        break;
+                    }
+                }
+                return fee;
+            default:
+                throw new IllegalArgumentException("Unsupported fee type");
         }
-        return amount.multiply(TRANSFER_FEE_RATE).setScale(2, BigDecimal.ROUND_HALF_UP);
     }
 
-    /**
-     * Process fee deduction from a given amount.
-     *
-     * @param amount The original amount
-     * @return The amount after deducting the fee
-     */
-    public BigDecimal processFeeDeduction(BigDecimal amount) {
-        BigDecimal fee = calculateTransferFee(amount);
-        return amount.subtract(fee).setScale(2, BigDecimal.ROUND_HALF_UP);
-    }
-
-    /**
-     * Add fee amount to a fee account.
-     *
-     * @param accountId The fee account identifier
-     * @param feeAmount The fee amount to add
-     */
-    public void addFeeToAccount(String accountId, BigDecimal feeAmount) {
-        if (accountId == null || accountId.isEmpty()) {
-            throw new IllegalArgumentException("Account ID must not be null or empty");
-        }
-        if (feeAmount == null || feeAmount.compareTo(BigDecimal.ZERO) < 0) {
-            throw new IllegalArgumentException("Fee amount must not be negative");
-        }
-        feeAccounts.put(accountId, feeAccounts.getOrDefault(accountId, BigDecimal.ZERO).add(feeAmount));
-    }
-
-    /**
-     * Get the balance of a fee account.
-     *
-     * @param accountId The fee account identifier
-     * @return The balance of the fee account
-     */
-    public BigDecimal getFeeAccountBalance(String accountId) {
-        if (accountId == null || accountId.isEmpty()) {
-            throw new IllegalArgumentException("Account ID must not be null or empty");
-        }
-        return feeAccounts.getOrDefault(accountId, BigDecimal.ZERO);
-    }
-
-    /**
-     * Clear the fee account balance (for example, after payout).
-     *
-     * @param accountId The fee account identifier
-     */
-    public void clearFeeAccount(String accountId) {
-        if (accountId == null || accountId.isEmpty()) {
-            throw new IllegalArgumentException("Account ID must not be null or empty");
-        }
-        feeAccounts.remove(accountId);
-    }
 }
